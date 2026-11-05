@@ -4,57 +4,61 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="format-detection" content="telephone=no">
-<meta name="theme-color" content="#0b0e14">
+<meta name="theme-color" content="#f6f7f9">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="校园通">
 <title>校园通 · SZTU</title>
 <link rel="manifest" href="manifest.json">
 <link rel="apple-touch-icon" href="icon-180.png">
 <link rel="icon" href="icon-180.png">
-<link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="style.css?v=3">
 </head>
 <body>
 <header class="topbar">
-  <div class="topbar-inner">
+  <div class="brand-row">
     <div class="brand">
       <span class="brand-dot" aria-hidden="true"></span>
       <h1>校园通</h1>
     </div>
-    <nav class="tabs" role="tablist" aria-label="切换视图">
-      <button class="tab is-active" data-tab="schedule" role="tab" aria-selected="true">课表</button>
-      <button class="tab" data-tab="notices" role="tab" aria-selected="false">通知</button>
-    </nav>
+    <button type="button" class="refresh" id="refresh" aria-label="刷新数据">
+      <span class="refresh-icon" aria-hidden="true">↻</span>
+    </button>
   </div>
+  <nav class="tabs" role="tablist" aria-label="切换视图">
+    <button class="tab is-active" data-tab="schedule" role="tab" aria-selected="true">课表</button>
+    <button class="tab" data-tab="notices" role="tab" aria-selected="false">通知</button>
+  </nav>
 </header>
 
 <main class="viewport">
-  <section id="panel-schedule" class="panel is-active" role="tabpanel" aria-labelledby="tab-schedule">
-    <div class="toolbar">
-      <label class="week-picker">
-        <span>周次</span>
-        <select id="week-select">
-          <option value="all">全部</option>
-        </select>
-      </label>
-      <span class="stamp" id="schedule-stamp"></span>
+  <section id="panel-schedule" class="panel is-active" role="tabpanel">
+    <div class="weekbar">
+      <button type="button" class="navbtn" id="prev-week" aria-label="上一周">‹</button>
+      <div class="weektitle">
+        <b id="week-label">第 1 周</b>
+        <span id="term-label"></span>
+      </div>
+      <button type="button" class="navbtn" id="next-week" aria-label="下一周">›</button>
+      <button type="button" class="pill" id="this-week">本周</button>
     </div>
+    <div class="stamp-row"><span class="stamp" id="schedule-stamp"></span></div>
     <div class="grid-scroll" id="grid-scroll">
       <div class="grid" id="schedule-grid"></div>
     </div>
     <p class="hint" id="schedule-hint" hidden></p>
   </section>
 
-  <section id="panel-notices" class="panel" role="tabpanel" aria-labelledby="tab-notices">
+  <section id="panel-notices" class="panel" role="tabpanel">
+    <div class="stamp-row"><span class="stamp" id="notices-stamp"></span></div>
     <ul class="notice-list" id="notice-list"></ul>
-    <button type="button" class="more-btn" id="notice-more" hidden>显示更多</button>
-    <p class="stamp stamp-block" id="notices-stamp"></p>
+    <button type="button" class="more-btn" id="notice-more" hidden>加载更多</button>
   </section>
 </main>
 
 <div class="toast" id="toast" role="status" aria-live="polite" hidden></div>
 
-<script src="app.js"></script>
+<script src="app.js?v=3"></script>
 </body>
 </html>

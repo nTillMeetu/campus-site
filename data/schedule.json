@@ -1,13 +1,94 @@
 {
-  "count": 16,
+  "count": 25,
   "courses": [
+    {
+      "course_name": "高等数学A1",
+      "end_section": 2,
+      "location": "C-5公共教学楼 C-5-103",
+      "start_section": 1,
+      "teacher": "敖勇",
+      "weekday": 1,
+      "weeks": "2-3,5-6,9-18"
+    },
+    {
+      "course_name": "思想道德与法治",
+      "end_section": 5,
+      "location": "C-5公共教学楼 C-5-409",
+      "start_section": 3,
+      "teacher": "赵颖",
+      "weekday": 1,
+      "weeks": "2-3,5-6,9-18"
+    },
+    {
+      "course_name": "Service Marketing in the Age of AI: Humans, Robots and the Future of Customer Experience",
+      "end_section": 7,
+      "location": "C-5公共教学楼 C-5-208",
+      "start_section": 6,
+      "teacher": "Christian Brock",
+      "weekday": 1,
+      "weeks": "4"
+    },
+    {
+      "course_name": "Service Marketing in the Age of AI: Humans, Robots and the Future of Customer Experience",
+      "end_section": 9,
+      "location": "C-5公共教学楼 C-5-208",
+      "start_section": 8,
+      "teacher": "Christian Brock",
+      "weekday": 1,
+      "weeks": "4"
+    },
+    {
+      "course_name": "体育俱乐部 I",
+      "end_section": 9,
+      "location": "D-2体育馆 D-2-综合馆二楼",
+      "start_section": 8,
+      "teacher": "铁煜荷",
+      "weekday": 1,
+      "weeks": "3,5-6,9-18"
+    },
+    {
+      "course_name": "形势与政策1",
+      "end_section": 14,
+      "location": "C-5公共教学楼 C-5-107",
+      "start_section": 13,
+      "teacher": "党学哲",
+      "weekday": 1,
+      "weeks": "13"
+    },
+    {
+      "course_name": "形势与政策1",
+      "end_section": 14,
+      "location": "C-5公共教学楼 C-5-107",
+      "start_section": 13,
+      "teacher": "苏娇妮",
+      "weekday": 1,
+      "weeks": "14"
+    },
+    {
+      "course_name": "形势与政策1",
+      "end_section": 14,
+      "location": "C-5公共教学楼 C-5-107",
+      "start_section": 13,
+      "teacher": "王宏岳",
+      "weekday": 1,
+      "weeks": "15"
+    },
+    {
+      "course_name": "形势与政策1",
+      "end_section": 14,
+      "location": "C-5公共教学楼 C-5-107",
+      "start_section": 13,
+      "teacher": "赵深澳",
+      "weekday": 1,
+      "weeks": "16"
+    },
     {
       "course_name": "Service Marketing in the Age of AI: Humans, Robots and the Future of Customer Experience",
       "end_section": 2,
       "location": "C-5公共教学楼 C-5-208",
       "start_section": 1,
       "teacher": "Christian Brock",
-      "weekday": 1,
+      "weekday": 2,
       "weeks": "4"
     },
     {
@@ -16,7 +97,7 @@
       "location": "C-5公共教学楼 C-5-301",
       "start_section": 1,
       "teacher": "刘海平",
-      "weekday": 1,
+      "weekday": 2,
       "weeks": "2-3,5-6,9-18"
     },
     {
@@ -25,7 +106,7 @@
       "location": "C-5公共教学楼 C-5-116",
       "start_section": 3,
       "teacher": "Reinhard Stolle",
-      "weekday": 1,
+      "weekday": 2,
       "weeks": "4"
     },
     {
@@ -34,7 +115,7 @@
       "location": "C-5公共教学楼 C-5-117",
       "start_section": 11,
       "teacher": "褚浩全（兼职）",
-      "weekday": 1,
+      "weekday": 2,
       "weeks": "1,4"
     },
     {
@@ -43,7 +124,7 @@
       "location": "C-5公共教学楼 C-5-117",
       "start_section": 11,
       "teacher": "隆武华（兼职）",
-      "weekday": 1,
+      "weekday": 2,
       "weeks": "2-3"
     },
     {
@@ -52,7 +133,7 @@
       "location": "C-5公共教学楼 C-5-117",
       "start_section": 11,
       "teacher": "隆武华（兼职）",
-      "weekday": 1,
+      "weekday": 2,
       "weeks": "5-18"
     },
     {
@@ -61,7 +142,7 @@
       "location": "C-5公共教学楼 C-5-103",
       "start_section": 1,
       "teacher": "敖勇",
-      "weekday": 2,
+      "weekday": 3,
       "weeks": "2-3,5-6,9-18"
     },
     {
@@ -70,7 +151,7 @@
       "location": "C-5公共教学楼 C-5-242",
       "start_section": 6,
       "teacher": "Christian Brock",
-      "weekday": 2,
+      "weekday": 3,
       "weeks": "4"
     },
     {
@@ -79,7 +160,7 @@
       "location": "C-5公共教学楼 C-5-449",
       "start_section": 6,
       "teacher": "谷也",
-      "weekday": 2,
+      "weekday": 3,
       "weeks": "2-3,5-6,9-18"
     },
     {
@@ -88,7 +169,7 @@
       "location": "C-5公共教学楼 C-5-242",
       "start_section": 8,
       "teacher": "Christian Brock",
-      "weekday": 2,
+      "weekday": 3,
       "weeks": "4"
     },
     {
@@ -97,7 +178,7 @@
       "location": "C-5公共教学楼 C-5-558机房",
       "start_section": 8,
       "teacher": "谷也",
-      "weekday": 2,
+      "weekday": 3,
       "weeks": "2-3,5-6,9-18"
     },
     {
@@ -106,7 +187,7 @@
       "location": "C-5公共教学楼 C-5-305",
       "start_section": 1,
       "teacher": "刘海平",
-      "weekday": 3,
+      "weekday": 4,
       "weeks": "2-3,5-6,9-18"
     },
     {
@@ -115,7 +196,7 @@
       "location": "C-5公共教学楼 C-5-350",
       "start_section": 3,
       "teacher": "曹志强",
-      "weekday": 3,
+      "weekday": 4,
       "weeks": "2-3,5-6,9-18"
     },
     {
@@ -124,7 +205,7 @@
       "location": "C-5公共教学楼 C-5-330",
       "start_section": 8,
       "teacher": "王一淇",
-      "weekday": 3,
+      "weekday": 4,
       "weeks": "2-3,5-6,9-18"
     },
     {
@@ -133,7 +214,7 @@
       "location": "C-5公共教学楼 C-5-208",
       "start_section": 1,
       "teacher": "Christian Brock",
-      "weekday": 6,
+      "weekday": 7,
       "weeks": "4"
     },
     {
@@ -142,10 +223,59 @@
       "location": "C-5公共教学楼 C-5-208",
       "start_section": 3,
       "teacher": "Christian Brock",
-      "weekday": 6,
+      "weekday": 7,
       "weeks": "4"
     }
   ],
+  "sections": [
+    {
+      "end": 2,
+      "start": 1,
+      "time": "08:30-09:55"
+    },
+    {
+      "end": 4,
+      "start": 3,
+      "time": "10:15-11:40"
+    },
+    {
+      "end": 5,
+      "start": 5,
+      "time": "11:45-12:25"
+    },
+    {
+      "end": 7,
+      "start": 6,
+      "time": "14:00-15:25"
+    },
+    {
+      "end": 9,
+      "start": 8,
+      "time": "15:45-17:10"
+    },
+    {
+      "end": 10,
+      "start": 10,
+      "time": "17:15-17:55"
+    },
+    {
+      "end": 12,
+      "start": 11,
+      "time": "19:00-20:20"
+    },
+    {
+      "end": 14,
+      "start": 13,
+      "time": "20:30-21:50"
+    },
+    {
+      "end": 15,
+      "start": 15,
+      "time": "18:00-18:40"
+    }
+  ],
   "source": "jwxt",
-  "updated_at": "2026-11-05T20:46:00+08:00"
+  "term": "2026-2027-1",
+  "term_start": "2026-08-31",
+  "updated_at": "2026-11-05T21:38:58+08:00"
 }
