@@ -45,6 +45,11 @@
 
   function pad(n) { return n < 10 ? '0' + n : '' + n; }
 
+  function checkStamp() {
+    var d = new Date();
+    return '检查于 ' + pad(d.getHours()) + ':' + pad(d.getMinutes());
+  }
+
   function fmtStamp(iso) {
     if (!iso) return '';
     var d = new Date(iso);
@@ -160,46 +165,56 @@
 
   /* ---------------- 课表 ---------------- */
 
-  /* 节次 -> 所在时间段的起止；首节显示开始时间，末节显示结束时间 */
-  function sectionRows() {
-    if (!state.sections.length) {
-      var seen = {};
-      state.courses.forEach(function (c) {
-        for (var s = c.start_section; s <= c.end_section; s++) seen[s] = 1;
-      });
-      return SECTION_ORDER.filter(function (n) { return seen[n]; })
-        .map(function (n) { return { sec: n, times: [] }; });
-    }
+  /* 教务系统只给「第1 2节 08:30-09:55」这种整段区间，
+     这里按节数均分出每一节自己的上下课时间，保证左栏每行都有完整起止。 */
+  function toMin(hhmm) {
+    var m = String(hhmm || '').match(/^(\d{1,2}):(\d{2})$/);
+    return m ? (+m[1]) * 60 + (+m[2]) : null;
+  }
 
-    var map = {};
+  function fromMin(v) {
+    v = Math.max(0, Math.round(v));
+    return pad(Math.floor(v / 60)) + ':' + pad(v % 60);
+  }
+
+  function sectionTimes() {
+    var out = {};
     state.sections.forEach(function (blk) {
       var parts = String(blk.time || '').split('-');
-      var a = parts[0] || '', b = parts[1] || '';
-      for (var s = blk.start; s <= blk.end; s++) {
-        map[s] = { first: s === blk.start, last: s === blk.end, a: a, b: b };
+      var a = toMin(parts[0]);
+      var b = toMin(parts[1]);
+      if (a === null || b === null || b <= a) return;
+      var n = Math.max(1, blk.end - blk.start + 1);
+      var step = (b - a) / n;
+      for (var i = 0; i < n; i++) {
+        out[blk.start + i] = {
+          start: fromMin(a + i * step),
+          end: fromMin(a + (i + 1) * step)
+        };
       }
     });
+    return out;
+  }
 
-    return SECTION_ORDER.filter(function (n) { return map[n]; }).map(function (sec) {
-      var m = map[sec];
-      var times = [];
-      if (m.first) times.push(m.a);
-      if (m.last && m.b && (!m.first || m.b !== m.a)) times.push(m.b);
-      return { sec: sec, times: times };
+  function sectionRows(times) {
+    var seen = {};
+    state.courses.forEach(function (c) {
+      for (var s = c.start_section; s <= c.end_section; s++) seen[s] = 1;
     });
+    if (!state.sections.length) {
+      return SECTION_ORDER.filter(function (n) { return seen[n]; })
+        .map(function (n) { return { sec: n, time: null }; });
+    }
+    return SECTION_ORDER.filter(function (n) { return times[n]; })
+      .map(function (n) { return { sec: n, time: times[n] }; });
   }
 
   /* 某节课的「上课-下课」时间 */
-  function timeLabel(startSec, endSec) {
-    var a = '', b = '';
-    state.sections.forEach(function (blk) {
-      var parts = String(blk.time || '').split('-');
-      if (blk.start <= startSec && startSec <= blk.end) a = parts[0] || '';
-      if (blk.start <= endSec && endSec <= blk.end) b = parts[1] || '';
-    });
+  function timeLabel(times, startSec, endSec) {
+    var a = times[startSec] ? times[startSec].start : '';
+    var b = times[endSec] ? times[endSec].end : (times[startSec] ? times[startSec].end : '');
     if (!a && !b) return '';
-    if (!b || a === b) return a;
-    return a + '-' + b;
+    return b && b !== a ? a + '-' + b : a;
   }
 
   function renderSchedule() {
@@ -225,7 +240,8 @@
       return !!w.set[week];
     });
 
-    var rows = sectionRows();
+    var times = sectionTimes();
+    var rows = sectionRows(times);
     var rowIndex = {};
     rows.forEach(function (r, i) { rowIndex[r.sec] = i + 1; });
 
@@ -265,11 +281,13 @@
       var b = document.createElement('b');
       b.textContent = row.sec;
       no.appendChild(b);
-      row.times.forEach(function (p) {
-        var sp = document.createElement('span');
-        sp.textContent = p;
-        no.appendChild(sp);
-      });
+      if (row.time) {
+        [row.time.start, row.time.end].forEach(function (p) {
+          var sp = document.createElement('span');
+          sp.textContent = p;
+          no.appendChild(sp);
+        });
+      }
       grid.appendChild(no);
 
       for (var c2 = 1; c2 <= 7; c2++) {
@@ -308,7 +326,7 @@
         name.textContent = c.course_name || '未命名课程';
         block.appendChild(name);
 
-        var tl = timeLabel(c.start_section, c.end_section);
+        var tl = timeLabel(times, c.start_section, c.end_section);
         if (tl) {
           var tm = document.createElement('div');
           tm.className = 'c-time';
@@ -453,7 +471,7 @@
       el.termLabel.textContent = state.term;
       renderSchedule();
       meta.scheduleAt = data.updated_at || '';
-      el.scheduleStamp.textContent = fmtStamp(data.updated_at) || '尚无数据';
+      el.scheduleStamp.textContent = (fmtStamp(data.updated_at) || '尚无数据') + ' · ' + checkStamp();
       meta.ok += 1;
     }).catch(function (err) {
       meta.fail += 1;
@@ -471,7 +489,7 @@
       var items = Array.isArray(data.notices) ? data.notices : [];
       renderNotices(items);
       meta.noticesAt = data.updated_at || '';
-      el.noticesStamp.textContent = (fmtStamp(data.updated_at) || '尚无数据') + ' · 共 ' + items.length + ' 条';
+      el.noticesStamp.textContent = '共 ' + items.length + ' 条 · ' + (fmtStamp(data.updated_at) || '尚无数据') + ' · ' + checkStamp();
       meta.ok += 1;
     }).catch(function (err) {
       meta.fail += 1;
