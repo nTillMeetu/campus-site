@@ -26,6 +26,7 @@
 html, body {
   margin: 0;
   padding: 0;
+  height: 100%;
   background: var(--bg);
   color: var(--text);
   font-family: -apple-system, BlinkMacSystemFont, "SF Pro SC", "PingFang SC",
@@ -35,15 +36,17 @@ html, body {
 }
 
 body {
-  min-height: 100vh;
-  min-height: 100dvh;
-  padding-bottom: var(--safe-bottom);
+  height: 100vh;
+  height: 100dvh;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
 }
 
 /* ---------- 顶栏 ---------- */
 .topbar {
-  position: sticky;
-  top: 0;
+  position: relative;
+  flex: none;
   z-index: 20;
   padding-top: var(--safe-top);
   background: rgba(246, 247, 249, 0.92);
@@ -130,10 +133,19 @@ body {
 }
 
 /* ---------- 面板 ---------- */
-.viewport { padding: 10px max(12px, var(--safe-right)) 0 max(12px, var(--safe-left)); }
+.viewport {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  padding: 10px max(12px, var(--safe-right)) 0 max(12px, var(--safe-left));
+  padding-bottom: var(--safe-bottom);
+}
 
 .panel { display: none; }
-.panel.is-active { display: block; }
+.panel.is-active { display: flex; flex-direction: column; flex: 1; min-height: 0; }
+
+#panel-notices { overflow-y: auto; -webkit-overflow-scrolling: touch; }
 
 /* ---------- 周次条 ---------- */
 .weekbar {
@@ -187,6 +199,8 @@ body {
 
 /* ---------- 课表网格 ---------- */
 .grid-scroll {
+  flex: 1;
+  min-height: 0;
   overflow-x: auto;
   overflow-y: hidden;
   -webkit-overflow-scrolling: touch;
@@ -196,6 +210,7 @@ body {
 }
 
 .grid {
+  height: 100%;
   display: grid;
   grid-template-columns: var(--sec-w) repeat(7, minmax(var(--col-w), 1fr));
   position: relative;
@@ -457,7 +472,7 @@ body {
 
 /* 手机（≤ 520px）：压缩留白，让周一到周五与全部节次尽量一屏显示 */
 @media (max-width: 520px) {
-  :root { --row-h: 37px; --head-h: 38px; --sec-w: 38px; --col-w: 63px; }
+  :root { --head-h: 36px; --sec-w: 38px; --col-w: 63px; }
 
   .brand-row { padding-top: 4px; }
   .brand h1 { font-size: 15px; }

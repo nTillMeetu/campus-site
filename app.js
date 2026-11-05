@@ -247,7 +247,7 @@
     var rowIndex = {};
     rows.forEach(function (r, i) { rowIndex[r.sec] = i + 1; });
 
-    grid.style.gridTemplateRows = 'var(--head-h) repeat(' + rows.length + ', var(--row-h))';
+    grid.style.gridTemplateRows = 'var(--head-h) repeat(' + rows.length + ', minmax(0, 1fr))';
 
     var monday = mondayOfWeek(week);
     var today = startOfDay(new Date());
@@ -555,12 +555,16 @@
 
   el.noticeMore.addEventListener('click', appendNoticeChunk);
 
-  window.addEventListener('scroll', function () {
+  function maybeLoadMore() {
     if (!el.panels.notices.classList.contains('is-active')) return;
     if (el.noticeMore.hidden) return;
     var rect = el.noticeMore.getBoundingClientRect();
-    if (rect.top < window.innerHeight + 200) appendNoticeChunk();
-  }, { passive: true });
+    if (rect.top < window.innerHeight + 240) appendNoticeChunk();
+  }
+
+  // 通知面板现在是内部滚动（整页不再滚动），两个都挂上以兼容
+  el.panels.notices.addEventListener('scroll', maybeLoadMore, { passive: true });
+  window.addEventListener('scroll', maybeLoadMore, { passive: true });
 
   document.addEventListener('visibilitychange', function () {
     if (document.visibilityState === 'visible' && !state.courses.length) loadAll();
