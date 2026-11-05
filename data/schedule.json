@@ -1,0 +1,151 @@
+{
+  "count": 16,
+  "courses": [
+    {
+      "course_name": "Service Marketing in the Age of AI: Humans, Robots and the Future of Customer Experience",
+      "end_section": 2,
+      "location": "C-5公共教学楼 C-5-208",
+      "start_section": 1,
+      "teacher": "Christian Brock",
+      "weekday": 1,
+      "weeks": "4"
+    },
+    {
+      "course_name": "大学英语A1",
+      "end_section": 2,
+      "location": "C-5公共教学楼 C-5-301",
+      "start_section": 1,
+      "teacher": "刘海平",
+      "weekday": 1,
+      "weeks": "2-3,5-6,9-18"
+    },
+    {
+      "course_name": "Introduction to the design of analog filters",
+      "end_section": 4,
+      "location": "C-5公共教学楼 C-5-116",
+      "start_section": 3,
+      "teacher": "Reinhard Stolle",
+      "weekday": 1,
+      "weeks": "4"
+    },
+    {
+      "course_name": "经济，金融与可持续发展",
+      "end_section": 12,
+      "location": "C-5公共教学楼 C-5-117",
+      "start_section": 11,
+      "teacher": "褚浩全（兼职）",
+      "weekday": 1,
+      "weeks": "1,4"
+    },
+    {
+      "course_name": "经济，金融与可持续发展",
+      "end_section": 12,
+      "location": "C-5公共教学楼 C-5-117",
+      "start_section": 11,
+      "teacher": "隆武华（兼职）",
+      "weekday": 1,
+      "weeks": "2-3"
+    },
+    {
+      "course_name": "经济，金融与可持续发展",
+      "end_section": 12,
+      "location": "C-5公共教学楼 C-5-117",
+      "start_section": 11,
+      "teacher": "隆武华（兼职）",
+      "weekday": 1,
+      "weeks": "5-18"
+    },
+    {
+      "course_name": "高等数学A1",
+      "end_section": 2,
+      "location": "C-5公共教学楼 C-5-103",
+      "start_section": 1,
+      "teacher": "敖勇",
+      "weekday": 2,
+      "weeks": "2-3,5-6,9-18"
+    },
+    {
+      "course_name": "Service Marketing in the Age of AI: Humans, Robots and the Future of Customer Experience",
+      "end_section": 7,
+      "location": "C-5公共教学楼 C-5-242",
+      "start_section": 6,
+      "teacher": "Christian Brock",
+      "weekday": 2,
+      "weeks": "4"
+    },
+    {
+      "course_name": "计算与人工智能基础A",
+      "end_section": 7,
+      "location": "C-5公共教学楼 C-5-449",
+      "start_section": 6,
+      "teacher": "谷也",
+      "weekday": 2,
+      "weeks": "2-3,5-6,9-18"
+    },
+    {
+      "course_name": "Service Marketing in the Age of AI: Humans, Robots and the Future of Customer Experience",
+      "end_section": 9,
+      "location": "C-5公共教学楼 C-5-242",
+      "start_section": 8,
+      "teacher": "Christian Brock",
+      "weekday": 2,
+      "weeks": "4"
+    },
+    {
+      "course_name": "计算与人工智能基础A",
+      "end_section": 9,
+      "location": "C-5公共教学楼 C-5-558机房",
+      "start_section": 8,
+      "teacher": "谷也",
+      "weekday": 2,
+      "weeks": "2-3,5-6,9-18"
+    },
+    {
+      "course_name": "大学英语A1",
+      "end_section": 2,
+      "location": "C-5公共教学楼 C-5-305",
+      "start_section": 1,
+      "teacher": "刘海平",
+      "weekday": 3,
+      "weeks": "2-3,5-6,9-18"
+    },
+    {
+      "course_name": "线性代数C",
+      "end_section": 5,
+      "location": "C-5公共教学楼 C-5-350",
+      "start_section": 3,
+      "teacher": "曹志强",
+      "weekday": 3,
+      "weeks": "2-3,5-6,9-18"
+    },
+    {
+      "course_name": "马克思主义基本原理",
+      "end_section": 10,
+      "location": "C-5公共教学楼 C-5-330",
+      "start_section": 8,
+      "teacher": "王一淇",
+      "weekday": 3,
+      "weeks": "2-3,5-6,9-18"
+    },
+    {
+      "course_name": "Service Marketing in the Age of AI: Humans, Robots and the Future of Customer Experience",
+      "end_section": 2,
+      "location": "C-5公共教学楼 C-5-208",
+      "start_section": 1,
+      "teacher": "Christian Brock",
+      "weekday": 6,
+      "weeks": "4"
+    },
+    {
+      "course_name": "Service Marketing in the Age of AI: Humans, Robots and the Future of Customer Experience",
+      "end_section": 4,
+      "location": "C-5公共教学楼 C-5-208",
+      "start_section": 3,
+      "teacher": "Christian Brock",
+      "weekday": 6,
+      "weeks": "4"
+    }
+  ],
+  "source": "jwxt",
+  "updated_at": "2026-11-05T20:46:00+08:00"
+}

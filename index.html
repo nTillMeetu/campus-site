@@ -1,0 +1,59 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="format-detection" content="telephone=no">
+<meta name="theme-color" content="#0b0e14">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="校园通">
+<title>校园通 · SZTU</title>
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="icon-180.png">
+<link rel="icon" href="icon-180.png">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<header class="topbar">
+  <div class="topbar-inner">
+    <div class="brand">
+      <span class="brand-dot" aria-hidden="true"></span>
+      <h1>校园通</h1>
+    </div>
+    <nav class="tabs" role="tablist" aria-label="切换视图">
+      <button class="tab is-active" data-tab="schedule" role="tab" aria-selected="true">课表</button>
+      <button class="tab" data-tab="notices" role="tab" aria-selected="false">公文通</button>
+    </nav>
+  </div>
+</header>
+
+<main class="viewport">
+  <section id="panel-schedule" class="panel is-active" role="tabpanel" aria-labelledby="tab-schedule">
+    <div class="toolbar">
+      <label class="week-picker">
+        <span>周次</span>
+        <select id="week-select">
+          <option value="all">全部</option>
+        </select>
+      </label>
+      <span class="stamp" id="schedule-stamp"></span>
+    </div>
+    <div class="grid-scroll" id="grid-scroll">
+      <div class="grid" id="schedule-grid"></div>
+    </div>
+    <p class="hint" id="schedule-hint" hidden></p>
+  </section>
+
+  <section id="panel-notices" class="panel" role="tabpanel" aria-labelledby="tab-notices">
+    <ul class="notice-list" id="notice-list"></ul>
+    <p class="stamp stamp-block" id="notices-stamp"></p>
+  </section>
+</main>
+
+<div class="toast" id="toast" role="status" aria-live="polite" hidden></div>
+
+<script src="app.js"></script>
+</body>
+</html>
