@@ -11,6 +11,7 @@
   --accent-soft: #eaf0fd;
   --danger: #d0564f;
   --radius: 14px;
+  --head-bg: #fbfcfe;
   --row-h: 46px;
   --head-h: 46px;
   --sec-w: 46px;
@@ -122,6 +123,27 @@ body {
 .panel { display: flex; flex-direction: column; flex: 1; min-height: 0; }
 
 
+/* ---------- 操作按钮 ---------- */
+.actions { display: flex; gap: 8px; align-items: center; }
+
+.iconbtn {
+  appearance: none;
+  border: 1px solid var(--line);
+  background: var(--panel);
+  color: var(--text-2);
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  font-size: 14px;
+  line-height: 1;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.iconbtn:active { background: var(--accent-soft); }
+
 /* ---------- 周次条 ---------- */
 .weekbar {
   display: flex;
@@ -197,7 +219,7 @@ body {
   position: sticky;
   top: 0;
   z-index: 3;
-  background: #fbfcfe;
+  background: var(--head-bg);
   border-bottom: 1px solid var(--line);
   display: flex;
   flex-direction: column;
@@ -350,6 +372,40 @@ body {
   border-radius: 10px;
   cursor: pointer;
 }
+
+/* ---------- 深色 ---------- */
+[data-theme="dark"] {
+  --bg: #0f1218;
+  --panel: #171c25;
+  --soft: #1c222d;
+  --line: #28303d;
+  --line-soft: #222a37;
+  --text: #e6eaf1;
+  --text-2: #b4bdcd;
+  --muted: #7e889b;
+  --accent: #88a9ef;
+  --accent-soft: #1d2a3d;
+  --head-bg: #1b212c;
+}
+
+[data-theme="dark"] .topbar {
+  background: rgba(15, 18, 24, 0.92);
+}
+
+[data-theme="dark"] .course .c-loc {
+  background: rgba(255, 255, 255, 0.09);
+  opacity: 0.8;
+}
+
+[data-theme="dark"] .course.theme-0 { background: #1c3226; color: #a7d5b5; }
+[data-theme="dark"] .course.theme-1 { background: #1a2940; color: #adc5ee; }
+[data-theme="dark"] .course.theme-2 { background: #292338; color: #c2b5e6; }
+[data-theme="dark"] .course.theme-3 { background: #332029; color: #ecb1c5; }
+[data-theme="dark"] .course.theme-4 { background: #352a1d; color: #e7c39a; }
+[data-theme="dark"] .course.theme-5 { background: #172f2d; color: #a1d1ca; }
+[data-theme="dark"] .course.theme-6 { background: #2e2b1b; color: #dccf9f; }
+
+[data-theme="dark"] .grid .cell-line { border-color: var(--line-soft); }
 
 /* ---------- Toast ---------- */
 .toast {

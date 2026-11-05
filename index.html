@@ -13,7 +13,15 @@
 <link rel="manifest" href="manifest.json">
 <link rel="apple-touch-icon" href="icon-180.png">
 <link rel="icon" href="icon-180.png">
-<link rel="stylesheet" href="style.css?v=12">
+<script>
+try {
+  var _t = localStorage.getItem('campus-theme');
+  if (_t === 'dark' || (!_t && matchMedia('(prefers-color-scheme: dark)').matches)) {
+    document.documentElement.dataset.theme = 'dark';
+  }
+} catch (e) {}
+</script>
+<link rel="stylesheet" href="style.css?v=13">
 </head>
 <body>
 <header class="topbar">
@@ -23,9 +31,14 @@
       <h1>校园通</h1>
       <span class="term" id="term-label"></span>
     </div>
-    <button type="button" class="refresh" id="refresh" aria-label="刷新数据">
+    <div class="actions">
+      <button type="button" class="iconbtn" id="theme-toggle" aria-label="切换深浅色">
+        <span id="theme-icon" aria-hidden="true">☾</span>
+      </button>
+      <button type="button" class="refresh" id="refresh" aria-label="刷新数据">
       <span class="refresh-icon" aria-hidden="true">↻</span>
-    </button>
+      </button>
+    </div>
   </div>
 </header>
 
@@ -46,6 +59,6 @@
 
 <div class="toast" id="toast" role="status" aria-live="polite" hidden></div>
 
-<script src="app.js?v=12"></script>
+<script src="app.js?v=13"></script>
 </body>
 </html>

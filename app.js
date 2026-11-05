@@ -437,6 +437,48 @@
 
   el.refresh.addEventListener('click', function () { loadAll(true); });
 
+  /* ---------------- 深浅色 ---------------- */
+
+  var THEME_KEY = 'campus-theme';
+  var themeBtn = document.getElementById('theme-toggle');
+  var themeIcon = document.getElementById('theme-icon');
+  var darkMedia = window.matchMedia('(prefers-color-scheme: dark)');
+
+  function savedTheme() {
+    try { return localStorage.getItem(THEME_KEY) || ''; } catch (e) { return ''; }
+  }
+
+  function isDark() {
+    return document.documentElement.dataset.theme === 'dark';
+  }
+
+  function applyTheme(dark) {
+    document.documentElement.dataset.theme = dark ? 'dark' : 'light';
+    themeIcon.textContent = dark ? '☀' : '☾';
+    themeBtn.setAttribute('aria-label', dark ? '切换到浅色' : '切换到深色');
+    var meta = document.querySelector('meta[name="theme-color"]');
+    if (meta) meta.setAttribute('content', dark ? '#0f1218' : '#f6f7f9');
+  }
+
+  function followSystem() {
+    var t = savedTheme();
+    applyTheme(t === 'dark' || (!t && darkMedia.matches));
+  }
+
+  followSystem();
+  if (darkMedia.addEventListener) {
+    darkMedia.addEventListener('change', followSystem);
+  } else if (darkMedia.addListener) {
+    darkMedia.addListener(followSystem);
+  }
+
+  themeBtn.addEventListener('click', function () {
+    var dark = !isDark();
+    try { localStorage.setItem(THEME_KEY, dark ? 'dark' : 'light'); } catch (e) {}
+    applyTheme(dark);
+    toast(dark ? '已切换到深色' : '已切换到浅色');
+  });
+
   document.addEventListener('visibilitychange', function () {
     if (document.visibilityState === 'visible' && !state.courses.length) loadAll();
   });
