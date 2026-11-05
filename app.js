@@ -191,37 +191,52 @@
       }
     }
 
-    // 课程块
+    // 同一时段可能有多门课（比如通识课撞课），按时间片分组后纵向堆叠，避免文字互相压住
+    var stacks = {};
     filtered.forEach(function (c) {
       var start = Math.max(1, Math.min(c.start_section || 1, maxSec));
       var end = Math.max(start, Math.min(c.end_section || start, maxSec));
-      var block = document.createElement('div');
-      block.className = 'course theme-' + paletteIndex(c.course_name || 'x');
-      block.style.gridColumn = String((c.weekday || 1) + 1);
-      block.style.gridRow = (start + 1) + ' / span ' + (end - start + 1);
+      var key = (c.weekday || 1) + '-' + start + '-' + end;
+      if (!stacks[key]) stacks[key] = { weekday: c.weekday || 1, start: start, end: end, items: [] };
+      stacks[key].items.push(c);
+    });
 
-      var name = document.createElement('div');
-      name.className = 'c-name';
-      name.textContent = c.course_name || '未命名课程';
-      block.appendChild(name);
+    Object.keys(stacks).forEach(function (key) {
+      var s = stacks[key];
+      var stack = document.createElement('div');
+      stack.className = 'course-stack' + (s.items.length > 1 ? ' is-multi' : '');
+      stack.style.gridColumn = String((s.weekday || 1) + 1);
+      stack.style.gridRow = (s.start + 1) + ' / span ' + (s.end - s.start + 1);
 
-      if (c.location) {
-        var loc = document.createElement('div');
-        loc.className = 'c-meta';
-        loc.textContent = '@' + c.location;
-        block.appendChild(loc);
-      }
+      s.items.forEach(function (c) {
+        var block = document.createElement('div');
+        block.className = 'course theme-' + paletteIndex(c.course_name || 'x');
 
-      block.addEventListener('click', function () {
-        var parts = [c.course_name];
-        if (c.teacher) parts.push('教师：' + c.teacher);
-        if (c.location) parts.push('地点：' + c.location);
-        parts.push('时间：' + tips[(c.weekday || 1) - 1] + ' 第' + start + '-' + end + '节');
-        if (c.weeks) parts.push('周次：' + c.weeks);
-        toast(parts.join('\n').replace(/\n/g, ' · '));
+        var name = document.createElement('div');
+        name.className = 'c-name';
+        name.textContent = c.course_name || '未命名课程';
+        block.appendChild(name);
+
+        if (c.location) {
+          var loc = document.createElement('div');
+          loc.className = 'c-meta';
+          loc.textContent = '@' + c.location;
+          block.appendChild(loc);
+        }
+
+        block.addEventListener('click', function () {
+          var parts = [c.course_name];
+          if (c.teacher) parts.push('教师：' + c.teacher);
+          if (c.location) parts.push('地点：' + c.location);
+          parts.push('时间：' + tips[(c.weekday || 1) - 1] + ' 第' + s.start + '-' + s.end + '节');
+          if (c.weeks) parts.push('周次：' + c.weeks);
+          toast(parts.join('\n').replace(/\n/g, ' · '));
+        });
+
+        stack.appendChild(block);
       });
 
-      grid.appendChild(block);
+      grid.appendChild(stack);
     });
 
     // 窄屏（手机）时把「今天」那一列滚进可视区
