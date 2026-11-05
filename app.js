@@ -98,7 +98,9 @@
 
   function shortLoc(loc) {
     var parts = String(loc || '').replace(/[【】]/g, '').trim().split(/\s+/);
-    return parts.length > 1 ? parts[parts.length - 1] : (parts[0] || '');
+    var s = parts.length > 1 ? parts[parts.length - 1] : (parts[0] || '');
+    // 在「数字/字母」与「汉字」交界处留一个可断行的位置，避免把 C-5-558机房 拆成 房/机
+    return s.replace(/([0-9A-Za-z\-])([\u4e00-\u9fa5])/g, '$1\u200b$2');
   }
 
   function paletteIndex(name) {
@@ -245,7 +247,7 @@
     var rowIndex = {};
     rows.forEach(function (r, i) { rowIndex[r.sec] = i + 1; });
 
-    grid.style.gridTemplateRows = '46px repeat(' + rows.length + ', 48px)';
+    grid.style.gridTemplateRows = 'var(--head-h) repeat(' + rows.length + ', var(--row-h))';
 
     var monday = mondayOfWeek(week);
     var today = startOfDay(new Date());
@@ -543,7 +545,9 @@
     state.week = currentWeek();
     renderSchedule();
     var head = el.grid.querySelector('.day-head.is-today');
-    if (head) el.gridScroll.scrollLeft = Math.max(0, head.offsetLeft - 62);
+    var no = el.grid.querySelector('.sec-no');
+    var secW = no ? no.offsetWidth : 46;
+    if (head) el.gridScroll.scrollLeft = Math.max(0, head.offsetLeft - secW);
     toast('已跳到第 ' + state.week + ' 周');
   });
 
