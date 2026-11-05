@@ -8,25 +8,15 @@
   var SECTION_ORDER = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 15, 11, 12, 13, 14];
 
   var el = {
-    tabs: document.querySelectorAll('.tab'),
-    panels: {
-      schedule: document.getElementById('panel-schedule'),
-      notices: document.getElementById('panel-notices')
-    },
     grid: document.getElementById('schedule-grid'),
     gridScroll: document.getElementById('grid-scroll'),
-    hint: document.getElementById('schedule-hint'),
     weekLabel: document.getElementById('week-label'),
     termLabel: document.getElementById('term-label'),
     prevWeek: document.getElementById('prev-week'),
     nextWeek: document.getElementById('next-week'),
     thisWeek: document.getElementById('this-week'),
     refresh: document.getElementById('refresh'),
-    noticeList: document.getElementById('notice-list'),
-    noticeSearch: document.getElementById('notice-search'),
-    noticeMore: document.getElementById('notice-more'),
-    scheduleStamp: document.getElementById('schedule-stamp'),
-    noticesStamp: document.getElementById('notices-stamp'),
+    stamp: document.getElementById('schedule-stamp'),
     toast: document.getElementById('toast')
   };
 
@@ -37,17 +27,19 @@
     termStart: null,
     week: 0,
     maxWeek: 18,
-    notices: [],
-    noticesAll: [],
-    noticeQuery: '',
-    noticesAt: '',
-    noticeShown: 0,
     busy: false
   };
 
   /* ---------------- 工具 ---------------- */
 
   function pad(n) { return n < 10 ? '0' + n : '' + n; }
+
+  function fmtStamp(iso) {
+    if (!iso) return '';
+    var d = new Date(iso);
+    if (isNaN(d.getTime())) return '';
+    return '更新于 ' + (d.getMonth() + 1) + '/' + d.getDate() + ' ' + pad(d.getHours()) + ':' + pad(d.getMinutes());
+  }
 
   function agoText(iso) {
     if (!iso) return '';
@@ -64,13 +56,6 @@
   function checkStamp() {
     var d = new Date();
     return '检查于 ' + pad(d.getHours()) + ':' + pad(d.getMinutes());
-  }
-
-  function fmtStamp(iso) {
-    if (!iso) return '';
-    var d = new Date(iso);
-    if (isNaN(d.getTime())) return '';
-    return '更新于 ' + (d.getMonth() + 1) + '/' + d.getDate() + ' ' + pad(d.getHours()) + ':' + pad(d.getMinutes());
   }
 
   function addDays(date, n) {
@@ -112,17 +97,17 @@
     return { set: set, min: isFinite(min) ? min : 0, max: max, empty: max === 0 };
   }
 
+  function paletteIndex(name) {
+    var h = 0;
+    for (var i = 0; i < name.length; i++) h = (h * 31 + name.charCodeAt(i)) % 1009;
+    return h % 7;
+  }
+
   function shortLoc(loc) {
     var parts = String(loc || '').replace(/[【】]/g, '').trim().split(/\s+/);
     var s = parts.length > 1 ? parts[parts.length - 1] : (parts[0] || '');
     // 在「数字/字母」与「汉字」交界处留一个可断行的位置，避免把 C-5-558机房 拆成 房/机
     return s.replace(/([0-9A-Za-z\-])([\u4e00-\u9fa5])/g, '$1\u200b$2');
-  }
-
-  function paletteIndex(name) {
-    var h = 0;
-    for (var i = 0; i < name.length; i++) h = (h * 31 + name.charCodeAt(i)) % 1009;
-    return h % 7;
   }
 
   function currentWeek() {
@@ -140,8 +125,8 @@
 
   /* ---------------- 状态块 ---------------- */
 
-  function showState(panel, opts) {
-    var old = panel.querySelector('.state');
+  function showState(opts) {
+    var old = document.querySelector('.viewport .state');
     if (old) old.remove();
     var box = document.createElement('div');
     box.className = 'state' + (opts.error ? ' error' : '');
@@ -163,14 +148,14 @@
       box.appendChild(btn);
     }
 
-    var anchor = panel.querySelector('.stamp-row');
-    if (anchor && anchor.parentNode === panel) panel.insertBefore(box, anchor.nextSibling);
-    else panel.appendChild(box);
+    var anchor = document.querySelector('.viewport .stamp-row');
+    if (anchor) anchor.parentNode.insertBefore(box, anchor.nextSibling);
+    else document.querySelector('.viewport').appendChild(box);
     return box;
   }
 
-  function clearState(panel) {
-    var old = panel.querySelector('.state');
+  function clearState() {
+    var old = document.querySelector('.viewport .state');
     if (old) old.remove();
   }
 
@@ -227,7 +212,6 @@
       .map(function (n) { return { sec: n, time: times[n] }; });
   }
 
-  /* 某节课的「上课-下课」时间 */
   function timeLabel(times, startSec, endSec) {
     var a = times[startSec] ? times[startSec].start : '';
     var b = times[endSec] ? times[endSec].end : (times[startSec] ? times[startSec].end : '');
@@ -241,14 +225,13 @@
 
     if (!state.courses.length) {
       grid.style.display = 'none';
-      el.hint.hidden = true;
-      showState(el.panels.schedule, {
+      showState({
         title: '还没有课表数据',
         text: '定时任务跑通后会自动出现，也可以点右上角刷新。'
       });
       return;
     }
-    clearState(el.panels.schedule);
+    clearState();
     grid.style.display = 'grid';
 
     var week = state.week;
@@ -375,118 +358,6 @@
     });
 
     el.weekLabel.textContent = '第 ' + week + ' 周';
-
-    var cr = currentWeek();
-    el.hint.hidden = false;
-    el.hint.textContent = week === cr
-      ? '本周共 ' + filtered.length + ' 个上课时段 · 左右滑动查看整周'
-      : '第 ' + week + ' 周共 ' + filtered.length + ' 个上课时段' + (week < cr ? '（已过去）' : '');
-  }
-
-  /* ---------------- 通知 ---------------- */
-
-  function noticeItem(n) {
-    var li = document.createElement('li');
-    var a = document.createElement('a');
-    a.href = n.url || '#';
-    a.target = '_blank';
-    a.rel = 'noopener noreferrer';
-
-    var t = document.createElement('div');
-    t.className = 'notice-title';
-    t.textContent = n.title || '(无标题)';
-    a.appendChild(t);
-
-    var meta = document.createElement('div');
-    meta.className = 'notice-meta';
-    if (n.category) {
-      var cat = document.createElement('span');
-      cat.className = 'cat';
-      cat.textContent = n.category;
-      meta.appendChild(cat);
-    }
-    if (n.department) {
-      var dep = document.createElement('span');
-      dep.className = 'dept';
-      dep.textContent = n.department;
-      meta.appendChild(dep);
-    }
-    if (n.date) {
-      var dt = document.createElement('span');
-      dt.textContent = n.date;
-      meta.appendChild(dt);
-    }
-    a.appendChild(meta);
-    li.appendChild(a);
-    return li;
-  }
-
-  function updateNoticeStamp() {
-    var total = state.noticesAll.length;
-    var shown = state.notices.length;
-    var parts = [];
-    if (state.noticeQuery) parts.push('命中 ' + shown + ' / ' + total + ' 条');
-    else parts.push('共 ' + total + ' 条');
-    parts.push(state.noticesAt
-      ? fmtStamp(state.noticesAt) + '（' + agoText(state.noticesAt) + '）'
-      : '尚无数据');
-    parts.push(checkStamp());
-    el.noticesStamp.textContent = parts.join(' · ');
-  }
-
-  function renderNotices(items) {
-    state.noticesAll = items;
-    applyNoticeFilter();
-  }
-
-  function applyNoticeFilter() {
-    var q = state.noticeQuery.toLowerCase();
-    var arr = state.noticesAll;
-    if (q) {
-      arr = arr.filter(function (n) {
-        return (n.title || '').toLowerCase().indexOf(q) >= 0
-          || (n.department || '').toLowerCase().indexOf(q) >= 0
-          || (n.category || '').toLowerCase().indexOf(q) >= 0
-          || (n.date || '').indexOf(q) >= 0;
-      });
-    }
-
-    state.notices = arr;
-    state.noticeShown = 0;
-    el.noticeList.textContent = '';
-
-    if (!arr.length) {
-      el.noticeMore.hidden = true;
-      showState(el.panels.notices, {
-        title: q ? '没有匹配的通知' : '还没有通知',
-        text: q
-          ? '「' + state.noticeQuery + '」在 ' + state.noticesAll.length + ' 条记录里没有找到'
-          : '公告抓取成功后会出现在这里。'
-      });
-      updateNoticeStamp();
-      return;
-    }
-
-    clearState(el.panels.notices);
-    appendNoticeChunk();
-    updateNoticeStamp();
-  }
-
-  function appendNoticeChunk() {
-    var CHUNK = 60;
-    var slice = state.notices.slice(state.noticeShown, state.noticeShown + CHUNK);
-    var frag = document.createDocumentFragment();
-    slice.forEach(function (n) { frag.appendChild(noticeItem(n)); });
-    el.noticeList.appendChild(frag);
-    state.noticeShown += slice.length;
-
-    var left = state.notices.length - state.noticeShown;
-    if (left > 0) {
-      el.noticeMore.hidden = false;
-      el.noticeMore.textContent = '加载更多（还有 ' + left + ' 条）';
-    } else {
-      el.noticeMore.hidden = true;
-    }
   }
 
   /* ---------------- 加载 ---------------- */
@@ -500,11 +371,9 @@
   function loadAll(showToast) {
     if (state.busy) return Promise.resolve();
     setBusy(true);
-    var meta = { ok: 0, fail: 0, scheduleAt: '', noticesAt: '' };
-    el.scheduleStamp.textContent = '加载中…';
-    el.noticesStamp.textContent = '加载中…';
+    el.stamp.textContent = '加载中…';
 
-    var p1 = fetchJSON('data/schedule.json').then(function (data) {
+    return fetchJSON('data/schedule.json').then(function (data) {
       state.courses = Array.isArray(data.courses) ? data.courses : [];
       state.sections = Array.isArray(data.sections) ? data.sections : [];
       state.term = data.term || '';
@@ -522,69 +391,31 @@
 
       el.termLabel.textContent = state.term;
       renderSchedule();
-      meta.scheduleAt = data.updated_at || '';
-      el.scheduleStamp.textContent = (fmtStamp(data.updated_at) || '尚无数据') +
+
+      el.stamp.textContent = (fmtStamp(data.updated_at) || '尚无数据') +
         (data.updated_at ? '（' + agoText(data.updated_at) + '）' : '') + ' · ' + checkStamp();
-      meta.ok += 1;
+
+      setBusy(false);
+      if (showToast) {
+        var now = new Date();
+        toast('已检查 ' + pad(now.getHours()) + ':' + pad(now.getMinutes()) +
+          (data.updated_at ? ' · 数据 ' + agoText(data.updated_at) : ''));
+      }
     }).catch(function (err) {
-      meta.fail += 1;
       el.grid.style.display = 'none';
-      showState(el.panels.schedule, {
+      showState({
         title: '课表加载失败',
         text: '网络不通或数据还没生成（' + err.message + '）',
         retry: true,
         error: true
       });
-      el.scheduleStamp.textContent = '';
-    });
-
-    var p2 = fetchJSON('data/notices.json').then(function (data) {
-      var items = Array.isArray(data.notices) ? data.notices : [];
-      state.noticesAt = data.updated_at || '';
-      renderNotices(items);
-      meta.noticesAt = data.updated_at || '';
-      meta.ok += 1;
-    }).catch(function (err) {
-      meta.fail += 1;
-      showState(el.panels.notices, {
-        title: '通知加载失败',
-        text: '网络不通或数据还没生成（' + err.message + '）',
-        retry: true,
-        error: true
-      });
-      el.noticesStamp.textContent = '';
-    });
-
-    return Promise.all([p1, p2]).then(function () {
+      el.stamp.textContent = '';
       setBusy(false);
-      if (!showToast) return;
-      if (meta.fail && !meta.ok) {
-        toast('刷新失败，请检查网络后重试');
-        return;
-      }
-      var latest = [meta.scheduleAt, meta.noticesAt].filter(Boolean).sort().pop();
-      var now = new Date();
-      var hhmm = pad(now.getHours()) + ':' + pad(now.getMinutes());
-      toast('已检查 ' + hhmm + (latest ? ' · 数据 ' + agoText(latest) : ''));
+      if (showToast) toast('刷新失败，请检查网络');
     });
   }
 
   /* ---------------- 交互 ---------------- */
-
-  el.tabs.forEach(function (btn) {
-    btn.addEventListener('click', function () {
-      var name = btn.dataset.tab;
-      el.tabs.forEach(function (b) {
-        var on = b === btn;
-        b.classList.toggle('is-active', on);
-        b.setAttribute('aria-selected', on ? 'true' : 'false');
-      });
-      Object.keys(el.panels).forEach(function (k) {
-        el.panels[k].classList.toggle('is-active', k === name);
-      });
-      if (name === 'schedule') renderSchedule();
-    });
-  });
 
   el.prevWeek.addEventListener('click', function () {
     if (state.week > 1) { state.week -= 1; renderSchedule(); }
@@ -605,30 +436,6 @@
   });
 
   el.refresh.addEventListener('click', function () { loadAll(true); });
-
-  el.noticeMore.addEventListener('click', appendNoticeChunk);
-
-  var searchTimer = null;
-  el.noticeSearch.addEventListener('input', function () {
-    clearTimeout(searchTimer);
-    var v = el.noticeSearch.value.trim();
-    searchTimer = setTimeout(function () {
-      state.noticeQuery = v;
-      applyNoticeFilter();
-      el.panels.notices.scrollTop = 0;
-    }, 180);
-  });
-
-  function maybeLoadMore() {
-    if (!el.panels.notices.classList.contains('is-active')) return;
-    if (el.noticeMore.hidden) return;
-    var rect = el.noticeMore.getBoundingClientRect();
-    if (rect.top < window.innerHeight + 240) appendNoticeChunk();
-  }
-
-  // 通知面板现在是内部滚动（整页不再滚动），两个都挂上以兼容
-  el.panels.notices.addEventListener('scroll', maybeLoadMore, { passive: true });
-  window.addEventListener('scroll', maybeLoadMore, { passive: true });
 
   document.addEventListener('visibilitychange', function () {
     if (document.visibilityState === 'visible' && !state.courses.length) loadAll();
