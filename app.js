@@ -155,11 +155,12 @@
     el.toast.textContent = msg;
     el.toast.hidden = false;
     clearTimeout(toast._t);
-    toast._t = setTimeout(function () { el.toast.hidden = true; }, 2600);
+    toast._t = setTimeout(function () { el.toast.hidden = true; }, 3200);
   }
 
   /* ---------------- 课表 ---------------- */
 
+  /* 节次 -> 所在时间段的起止；首节显示开始时间，末节显示结束时间 */
   function sectionRows() {
     if (!state.sections.length) {
       var seen = {};
@@ -167,20 +168,38 @@
         for (var s = c.start_section; s <= c.end_section; s++) seen[s] = 1;
       });
       return SECTION_ORDER.filter(function (n) { return seen[n]; })
-        .map(function (n) { return { sec: n, time: '' }; });
+        .map(function (n) { return { sec: n, times: [] }; });
     }
 
-    var timeOf = {};
+    var map = {};
     state.sections.forEach(function (blk) {
-      for (var s = blk.start; s <= blk.end; s++) timeOf[s] = blk.time || '';
+      var parts = String(blk.time || '').split('-');
+      var a = parts[0] || '', b = parts[1] || '';
+      for (var s = blk.start; s <= blk.end; s++) {
+        map[s] = { first: s === blk.start, last: s === blk.end, a: a, b: b };
+      }
     });
 
-    return SECTION_ORDER.map(function (sec) {
-      var t = timeOf[sec] || '';
-      // 同一节次段（如 1-2 节）只在第一行显示时间
-      if (t && timeOf[sec - 1] === t) t = '';
-      return { sec: sec, time: t };
+    return SECTION_ORDER.filter(function (n) { return map[n]; }).map(function (sec) {
+      var m = map[sec];
+      var times = [];
+      if (m.first) times.push(m.a);
+      if (m.last && m.b && (!m.first || m.b !== m.a)) times.push(m.b);
+      return { sec: sec, times: times };
     });
+  }
+
+  /* 某节课的「上课-下课」时间 */
+  function timeLabel(startSec, endSec) {
+    var a = '', b = '';
+    state.sections.forEach(function (blk) {
+      var parts = String(blk.time || '').split('-');
+      if (blk.start <= startSec && startSec <= blk.end) a = parts[0] || '';
+      if (blk.start <= endSec && endSec <= blk.end) b = parts[1] || '';
+    });
+    if (!a && !b) return '';
+    if (!b || a === b) return a;
+    return a + '-' + b;
   }
 
   function renderSchedule() {
@@ -246,13 +265,11 @@
       var b = document.createElement('b');
       b.textContent = row.sec;
       no.appendChild(b);
-      if (row.time) {
-        row.time.split('-').forEach(function (p) {
-          var sp = document.createElement('span');
-          sp.textContent = p;
-          no.appendChild(sp);
-        });
-      }
+      row.times.forEach(function (p) {
+        var sp = document.createElement('span');
+        sp.textContent = p;
+        no.appendChild(sp);
+      });
       grid.appendChild(no);
 
       for (var c2 = 1; c2 <= 7; c2++) {
@@ -290,6 +307,14 @@
         name.className = 'c-name';
         name.textContent = c.course_name || '未命名课程';
         block.appendChild(name);
+
+        var tl = timeLabel(c.start_section, c.end_section);
+        if (tl) {
+          var tm = document.createElement('div');
+          tm.className = 'c-time';
+          tm.textContent = tl;
+          block.appendChild(tm);
+        }
 
         if (c.location) {
           var loc = document.createElement('div');
@@ -405,6 +430,7 @@
   function loadAll(showToast) {
     if (state.busy) return Promise.resolve();
     setBusy(true);
+    var meta = { ok: 0, fail: 0, scheduleAt: '', noticesAt: '' };
     el.scheduleStamp.textContent = '加载中…';
     el.noticesStamp.textContent = '加载中…';
 
@@ -426,8 +452,11 @@
 
       el.termLabel.textContent = state.term;
       renderSchedule();
+      meta.scheduleAt = data.updated_at || '';
       el.scheduleStamp.textContent = fmtStamp(data.updated_at) || '尚无数据';
+      meta.ok += 1;
     }).catch(function (err) {
+      meta.fail += 1;
       el.grid.style.display = 'none';
       showState(el.panels.schedule, {
         title: '课表加载失败',
@@ -441,8 +470,11 @@
     var p2 = fetchJSON('data/notices.json').then(function (data) {
       var items = Array.isArray(data.notices) ? data.notices : [];
       renderNotices(items);
+      meta.noticesAt = data.updated_at || '';
       el.noticesStamp.textContent = (fmtStamp(data.updated_at) || '尚无数据') + ' · 共 ' + items.length + ' 条';
+      meta.ok += 1;
     }).catch(function (err) {
+      meta.fail += 1;
       showState(el.panels.notices, {
         title: '通知加载失败',
         text: '网络不通或数据还没生成（' + err.message + '）',
@@ -454,7 +486,13 @@
 
     return Promise.all([p1, p2]).then(function () {
       setBusy(false);
-      if (showToast) toast('已更新');
+      if (!showToast) return;
+      if (meta.fail && !meta.ok) {
+        toast('刷新失败，请检查网络后重试');
+        return;
+      }
+      var latest = [meta.scheduleAt, meta.noticesAt].filter(Boolean).sort().pop();
+      toast(latest ? ('已刷新 · 数据时间 ' + fmtStamp(latest).replace('更新于 ', '')) : '已刷新');
     });
   }
 
@@ -487,7 +525,7 @@
     state.week = currentWeek();
     renderSchedule();
     var head = el.grid.querySelector('.day-head.is-today');
-    if (head) el.gridScroll.scrollLeft = Math.max(0, head.offsetLeft - 52);
+    if (head) el.gridScroll.scrollLeft = Math.max(0, head.offsetLeft - 62);
     toast('已跳到第 ' + state.week + ' 周');
   });
 

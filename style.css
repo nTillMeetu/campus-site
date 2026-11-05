@@ -193,9 +193,9 @@ body {
 
 .grid {
   display: grid;
-  grid-template-columns: 52px repeat(7, minmax(86px, 1fr));
+  grid-template-columns: 62px repeat(7, minmax(84px, 1fr));
   position: relative;
-  min-width: 660px;
+  min-width: 672px;
 }
 
 .grid .corner,
@@ -237,8 +237,8 @@ body {
   padding: 2px 0;
 }
 
-.grid .sec-no b { font-size: 11px; font-weight: 500; color: #6b7385; }
-.grid .sec-no span { font-size: 9px; letter-spacing: -0.2px; }
+.grid .sec-no b { font-size: 12px; font-weight: 500; color: #5f6878; line-height: 1.1; }
+.grid .sec-no span { font-size: 9.5px; line-height: 1.15; letter-spacing: -0.1px; color: #98a0b0; }
 
 .grid .cell-line {
   border-left: 1px solid var(--line-soft);
@@ -262,12 +262,20 @@ body {
   cursor: pointer;
   display: flex;
   flex-direction: column;
-  justify-content: space-between;
-  gap: 3px;
+  justify-content: flex-start;
+  gap: 2px;
   flex: 1 1 0;
   min-height: 0;
   background: #eef3fb;
   color: #2b4a7d;
+}
+
+.course .c-time {
+  font-size: 9.5px;
+  line-height: 1.2;
+  color: inherit;
+  opacity: 0.72;
+  white-space: nowrap;
 }
 
 .course .c-name {
@@ -293,11 +301,13 @@ body {
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+  margin-top: auto;
 }
 
 .course-stack.is-multi .course { padding: 4px 6px; }
 .course-stack.is-multi .course .c-name { font-size: 10.5px; -webkit-line-clamp: 2; }
 .course-stack.is-multi .course .c-loc { display: none; }
+.course-stack.is-multi .course .c-time { font-size: 9px; opacity: 0.66; }
 
 /* 低饱和的课程配色 */
 .course.theme-0 { background: #e6f0e9; color: #2f6647; }
