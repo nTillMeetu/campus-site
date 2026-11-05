@@ -343,6 +343,26 @@ body {
 
 .hint { margin: 9px 4px 0; font-size: 11.5px; color: var(--muted); }
 
+/* ---------- 搜索 ---------- */
+.search-row { padding: 2px 0 0; }
+
+.search-row input {
+  width: 100%;
+  appearance: none;
+  -webkit-appearance: none;
+  border: 1px solid var(--line);
+  background: var(--panel);
+  color: var(--text);
+  font-family: inherit;
+  font-size: 13px;
+  padding: 9px 12px;
+  border-radius: 10px;
+  outline: none;
+}
+
+.search-row input::placeholder { color: #a7aebc; }
+.search-row input:focus { border-color: #b9cdf3; background: #fcfdff; }
+
 /* ---------- 通知 ---------- */
 .notice-list {
   list-style: none;

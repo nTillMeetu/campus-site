@@ -23,6 +23,7 @@
     thisWeek: document.getElementById('this-week'),
     refresh: document.getElementById('refresh'),
     noticeList: document.getElementById('notice-list'),
+    noticeSearch: document.getElementById('notice-search'),
     noticeMore: document.getElementById('notice-more'),
     scheduleStamp: document.getElementById('schedule-stamp'),
     noticesStamp: document.getElementById('notices-stamp'),
@@ -37,6 +38,9 @@
     week: 0,
     maxWeek: 18,
     notices: [],
+    noticesAll: [],
+    noticeQuery: '',
+    noticesAt: '',
     noticeShown: 0,
     busy: false
   };
@@ -44,6 +48,18 @@
   /* ---------------- 工具 ---------------- */
 
   function pad(n) { return n < 10 ? '0' + n : '' + n; }
+
+  function agoText(iso) {
+    if (!iso) return '';
+    var ms = Date.now() - new Date(iso).getTime();
+    if (isNaN(ms) || ms < 0) return '刚刚';
+    var m = Math.floor(ms / 60000);
+    if (m < 1) return '刚刚';
+    if (m < 60) return m + ' 分钟前';
+    var h = Math.floor(m / 60);
+    if (h < 24) return h + ' 小时前';
+    return Math.floor(h / 24) + ' 天前';
+  }
 
   function checkStamp() {
     var d = new Date();
@@ -405,21 +421,55 @@
     return li;
   }
 
-  function renderNotices(items) {
-    el.noticeList.textContent = '';
-    state.notices = items;
-    state.noticeShown = 0;
+  function updateNoticeStamp() {
+    var total = state.noticesAll.length;
+    var shown = state.notices.length;
+    var parts = [];
+    if (state.noticeQuery) parts.push('命中 ' + shown + ' / ' + total + ' 条');
+    else parts.push('共 ' + total + ' 条');
+    parts.push(state.noticesAt
+      ? fmtStamp(state.noticesAt) + '（' + agoText(state.noticesAt) + '）'
+      : '尚无数据');
+    parts.push(checkStamp());
+    el.noticesStamp.textContent = parts.join(' · ');
+  }
 
-    if (!items.length) {
+  function renderNotices(items) {
+    state.noticesAll = items;
+    applyNoticeFilter();
+  }
+
+  function applyNoticeFilter() {
+    var q = state.noticeQuery.toLowerCase();
+    var arr = state.noticesAll;
+    if (q) {
+      arr = arr.filter(function (n) {
+        return (n.title || '').toLowerCase().indexOf(q) >= 0
+          || (n.department || '').toLowerCase().indexOf(q) >= 0
+          || (n.category || '').toLowerCase().indexOf(q) >= 0
+          || (n.date || '').indexOf(q) >= 0;
+      });
+    }
+
+    state.notices = arr;
+    state.noticeShown = 0;
+    el.noticeList.textContent = '';
+
+    if (!arr.length) {
       el.noticeMore.hidden = true;
       showState(el.panels.notices, {
-        title: '还没有通知',
-        text: '公告抓取成功后会出现在这里。'
+        title: q ? '没有匹配的通知' : '还没有通知',
+        text: q
+          ? '「' + state.noticeQuery + '」在 ' + state.noticesAll.length + ' 条记录里没有找到'
+          : '公告抓取成功后会出现在这里。'
       });
+      updateNoticeStamp();
       return;
     }
+
     clearState(el.panels.notices);
     appendNoticeChunk();
+    updateNoticeStamp();
   }
 
   function appendNoticeChunk() {
@@ -473,7 +523,8 @@
       el.termLabel.textContent = state.term;
       renderSchedule();
       meta.scheduleAt = data.updated_at || '';
-      el.scheduleStamp.textContent = (fmtStamp(data.updated_at) || '尚无数据') + ' · ' + checkStamp();
+      el.scheduleStamp.textContent = (fmtStamp(data.updated_at) || '尚无数据') +
+        (data.updated_at ? '（' + agoText(data.updated_at) + '）' : '') + ' · ' + checkStamp();
       meta.ok += 1;
     }).catch(function (err) {
       meta.fail += 1;
@@ -489,9 +540,9 @@
 
     var p2 = fetchJSON('data/notices.json').then(function (data) {
       var items = Array.isArray(data.notices) ? data.notices : [];
+      state.noticesAt = data.updated_at || '';
       renderNotices(items);
       meta.noticesAt = data.updated_at || '';
-      el.noticesStamp.textContent = '共 ' + items.length + ' 条 · ' + (fmtStamp(data.updated_at) || '尚无数据') + ' · ' + checkStamp();
       meta.ok += 1;
     }).catch(function (err) {
       meta.fail += 1;
@@ -512,7 +563,9 @@
         return;
       }
       var latest = [meta.scheduleAt, meta.noticesAt].filter(Boolean).sort().pop();
-      toast(latest ? ('已刷新 · 数据时间 ' + fmtStamp(latest).replace('更新于 ', '')) : '已刷新');
+      var now = new Date();
+      var hhmm = pad(now.getHours()) + ':' + pad(now.getMinutes());
+      toast('已检查 ' + hhmm + (latest ? ' · 数据 ' + agoText(latest) : ''));
     });
   }
 
@@ -554,6 +607,17 @@
   el.refresh.addEventListener('click', function () { loadAll(true); });
 
   el.noticeMore.addEventListener('click', appendNoticeChunk);
+
+  var searchTimer = null;
+  el.noticeSearch.addEventListener('input', function () {
+    clearTimeout(searchTimer);
+    var v = el.noticeSearch.value.trim();
+    searchTimer = setTimeout(function () {
+      state.noticeQuery = v;
+      applyNoticeFilter();
+      el.panels.notices.scrollTop = 0;
+    }, 180);
+  });
 
   function maybeLoadMore() {
     if (!el.panels.notices.classList.contains('is-active')) return;
