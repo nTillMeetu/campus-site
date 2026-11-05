@@ -334,6 +334,22 @@ body {
   text-overflow: ellipsis;
 }
 
+.more-btn {
+  display: block;
+  width: 100%;
+  margin: 12px 0 4px;
+  padding: 12px;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: var(--card);
+  color: var(--text);
+  font-family: inherit;
+  font-size: 13px;
+  cursor: pointer;
+}
+
+.more-btn:active { border-color: var(--accent); }
+
 /* ---------- 状态块 ---------- */
 .state {
   padding: 34px 20px;

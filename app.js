@@ -17,12 +17,13 @@
     hint: document.getElementById('schedule-hint'),
     weekSelect: document.getElementById('week-select'),
     noticeList: document.getElementById('notice-list'),
+    noticeMore: document.getElementById('notice-more'),
     scheduleStamp: document.getElementById('schedule-stamp'),
     noticesStamp: document.getElementById('notices-stamp'),
     toast: document.getElementById('toast')
   };
 
-  var state = { courses: [], week: 'all', weekOptions: [] };
+  var state = { courses: [], week: 'all', weekOptions: [], notices: [], noticeShown: 0 };
 
   /* ---------------- 工具 ---------------- */
 
@@ -278,8 +279,11 @@
   function renderNotices(items) {
     var list = el.noticeList;
     list.textContent = '';
+    state.notices = items;
+    state.noticeShown = 0;
 
     if (!items.length) {
+      el.noticeMore.hidden = true;
       showState(el.panels.notices, {
         title: '还没有公告数据',
         text: '抓取任务成功后会出现在这里。',
@@ -288,36 +292,55 @@
       return;
     }
     clearState(el.panels.notices);
+    appendNoticeChunk();
+  }
 
-    items.forEach(function (n) {
-      var li = document.createElement('li');
-      var a = document.createElement('a');
-      a.href = n.url || '#';
-      a.target = '_blank';
-      a.rel = 'noopener noreferrer';
+  function noticeItem(n) {
+    var li = document.createElement('li');
+    var a = document.createElement('a');
+    a.href = n.url || '#';
+    a.target = '_blank';
+    a.rel = 'noopener noreferrer';
 
-      var t = document.createElement('div');
-      t.className = 'notice-title';
-      t.textContent = n.title || '(无标题)';
-      a.appendChild(t);
+    var t = document.createElement('div');
+    t.className = 'notice-title';
+    t.textContent = n.title || '(无标题)';
+    a.appendChild(t);
 
-      var meta = document.createElement('div');
-      meta.className = 'notice-meta';
-      if (n.department) {
-        var dep = document.createElement('span');
-        dep.className = 'dept';
-        dep.textContent = n.department;
-        meta.appendChild(dep);
-      }
-      if (n.date) {
-        var dt = document.createElement('span');
-        dt.textContent = n.date;
-        meta.appendChild(dt);
-      }
-      a.appendChild(meta);
-      li.appendChild(a);
-      list.appendChild(li);
-    });
+    var meta = document.createElement('div');
+    meta.className = 'notice-meta';
+    if (n.department) {
+      var dep = document.createElement('span');
+      dep.className = 'dept';
+      dep.textContent = n.department;
+      meta.appendChild(dep);
+    }
+    if (n.date) {
+      var dt = document.createElement('span');
+      dt.textContent = n.date;
+      meta.appendChild(dt);
+    }
+    a.appendChild(meta);
+    li.appendChild(a);
+    return li;
+  }
+
+  /* 历史累积后可能有几百条，先渲染 40 条，避免手机上一次性铺满 DOM */
+  function appendNoticeChunk() {
+    var CHUNK = 40;
+    var slice = state.notices.slice(state.noticeShown, state.noticeShown + CHUNK);
+    var frag = document.createDocumentFragment();
+    slice.forEach(function (n) { frag.appendChild(noticeItem(n)); });
+    el.noticeList.appendChild(frag);
+    state.noticeShown += slice.length;
+
+    var left = state.notices.length - state.noticeShown;
+    if (left > 0) {
+      el.noticeMore.hidden = false;
+      el.noticeMore.textContent = '显示更多（还有 ' + left + ' 条）';
+    } else {
+      el.noticeMore.hidden = true;
+    }
   }
 
   /* ---------------- 加载 ---------------- */
@@ -372,6 +395,8 @@
       if (name === 'schedule' && el.gridScroll) el.gridScroll.scrollLeft = 0;
     });
   });
+
+  el.noticeMore.addEventListener('click', appendNoticeChunk);
 
   el.weekSelect.addEventListener('change', function () {
     state.week = el.weekSelect.value === 'all' ? 'all' : parseInt(el.weekSelect.value, 10);
