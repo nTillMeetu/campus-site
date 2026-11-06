@@ -41,6 +41,14 @@
     return '更新于 ' + (d.getMonth() + 1) + '/' + d.getDate() + ' ' + pad(d.getHours()) + ':' + pad(d.getMinutes());
   }
 
+  /* 紧凑格式：11/6 12:30，用于状态行 */
+  function fmtShort(iso) {
+    if (!iso) return '';
+    var d = new Date(iso);
+    if (isNaN(d.getTime())) return '';
+    return (d.getMonth() + 1) + '/' + d.getDate() + ' ' + pad(d.getHours()) + ':' + pad(d.getMinutes());
+  }
+
   function agoText(iso) {
     if (!iso) return '';
     var ms = Date.now() - new Date(iso).getTime();
@@ -55,7 +63,7 @@
 
   function checkStamp() {
     var d = new Date();
-    return '检查于 ' + pad(d.getHours()) + ':' + pad(d.getMinutes());
+    return '页面核对 ' + pad(d.getHours()) + ':' + pad(d.getMinutes());
   }
 
   function addDays(date, n) {
@@ -373,7 +381,12 @@
     setBusy(true);
     el.stamp.textContent = '加载中…';
 
-    return fetchJSON('data/schedule.json').then(function (data) {
+    return Promise.all([
+      fetchJSON('data/schedule.json'),
+      // 抓取状态：抓了几点、课表内容何时变过、是否失败（旧数据可能还没有此文件）
+      fetchJSON('data/status.json').catch(function () { return null; })
+    ]).then(function (results) {
+      var data = results[0], status = results[1];
       state.courses = Array.isArray(data.courses) ? data.courses : [];
       state.sections = Array.isArray(data.sections) ? data.sections : [];
       state.term = data.term || '';
@@ -392,14 +405,27 @@
       el.termLabel.textContent = state.term;
       renderSchedule();
 
-      el.stamp.textContent = (fmtStamp(data.updated_at) || '尚无数据') +
-        (data.updated_at ? '（' + agoText(data.updated_at) + '）' : '') + ' · ' + checkStamp();
+      // 状态行：抓取核对时间（每次运行都变） / 课表内容变更时间 / 本页核对时间
+      if (status && status.last_check_at) {
+        var fail = status.result && status.result !== 'success';
+        el.stamp.textContent = '抓取于 ' + fmtShort(status.last_check_at) + (fail ? '（失败）' : '') +
+          ' · 课表变更 ' + (fmtShort(status.last_change_at) || '—') +
+          ' · ' + checkStamp();
+      } else {
+        el.stamp.textContent = (fmtStamp(data.updated_at) || '尚无数据') +
+          (data.updated_at ? '（' + agoText(data.updated_at) + '）' : '') + ' · ' + checkStamp();
+      }
 
       setBusy(false);
       if (showToast) {
         var now = new Date();
-        toast('已检查 ' + pad(now.getHours()) + ':' + pad(now.getMinutes()) +
-          (data.updated_at ? ' · 数据 ' + agoText(data.updated_at) : ''));
+        var msg = '已核对 ' + pad(now.getHours()) + ':' + pad(now.getMinutes());
+        if (status && status.last_check_at) {
+          msg += ' · 服务器抓取 ' + agoText(status.last_check_at);
+          if (status.result && status.result !== 'success') msg += '（上次失败）';
+        }
+        if (data.updated_at) msg += ' · 课表变更 ' + agoText(data.updated_at);
+        toast(msg);
       }
     }).catch(function (err) {
       el.grid.style.display = 'none';
